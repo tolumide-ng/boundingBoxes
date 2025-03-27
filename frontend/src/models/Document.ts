@@ -1,15 +1,16 @@
+import { BoundingBox } from '../utils/boundingBox';
 
 export interface IBoundingBox {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-    origin: string;
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+  origin: string;
 }
 
 export interface IItem {
-    content: string;
-    boundingBox: IBoundingBox;
+  content: string;
+  boundingBox: IBoundingBox;
 }
 
 export interface IDocument {
@@ -20,8 +21,6 @@ export interface IDocument {
 }
 
 export default IDocument;
-
-
 
 export interface Item {
   boundingBox: {
@@ -35,8 +34,8 @@ export interface Item {
   origin: string;
 }
 
-export type Document = {
-  items: Item[];
+export type Document<T = BoundingBox> = {
+  items: T[];
   documentId: string;
   body: string;
 };

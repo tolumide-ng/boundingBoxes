@@ -7,7 +7,6 @@ export class MimeType {
   };
 
   static get(base64: string) {
-    console.log('the received arg is', base64);
     const mimeType = Object.keys(this.#signatures).find((magicNumber) =>
       base64.startsWith(magicNumber),
     );
