@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../store/store';
+import { AppDispatch } from '../store/store';
 import { fetchDocument } from '../store/slices/documents.slice';
 import { DocumentViewer } from '../components/DocumentViewer/DocumentViewer';
+import { selectDocument } from '../store/selectors/documents.selectors';
 
 export const Home = () => {
   const dispatch: AppDispatch = useDispatch();
-  const document = useSelector((state: RootState) => state.documents.document);
+  const document = useSelector(selectDocument);
 
   React.useEffect(() => {
     dispatch(fetchDocument());

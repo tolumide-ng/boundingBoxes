@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Item, type Document } from '../../models/Document';
 import { apiCall } from '../../utils/apiCall';
-import { BoundingBox } from '../../utils/boundingBox';
 
 export const fetchDocument = createAsyncThunk(
   'files/fetchDocument',
@@ -16,7 +15,7 @@ export const fetchDocument = createAsyncThunk(
 );
 
 interface FilesState {
-  document: Document | null;
+  document: Document<Item> | null;
   loading: boolean;
   error: string | null;
 }
@@ -40,10 +39,7 @@ const filesSlice = createSlice({
       fetchDocument.fulfilled,
       (state, action: PayloadAction<Document<Item>>) => {
         state.loading = false;
-        state.document = {
-          ...action.payload,
-          items: action.payload.items.map((item) => new BoundingBox(item)),
-        };
+        state.document = action.payload;
       },
     );
     builder.addCase(fetchDocument.rejected, (state, action) => {

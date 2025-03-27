@@ -3,6 +3,7 @@ import { Document } from '../../models/Document';
 import { MimeType } from '../../utils/mimeType';
 import { BoundingBox } from '../../utils/boundingBox';
 import { isPointInPolygon } from '../../utils/poingInPolygon';
+import { columnTitle } from '../../utils/columnTitle';
 
 export const DocumentViewer: React.FC<Document> = ({ body, items }) => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -11,19 +12,26 @@ export const DocumentViewer: React.FC<Document> = ({ body, items }) => {
 
   const highlighBoundingBoxes = React.useCallback(
     (ctx: CanvasRenderingContext2D) => {
-      selectedItems.forEach((item) => {
+      selectedItems.forEach((item, index) => {
         const {
           boundingBox: { polygon },
+          origin,
         } = item;
 
         ctx.beginPath();
+
+        let columnLength = 0;
 
         for (let i = 0; i < polygon.length; i += 2) {
           const x = polygon[i] * DPI;
           const y = polygon[i + 1] * DPI;
           if (i === 0) {
+            columnLength = x;
             ctx.moveTo(x, y);
           } else {
+            if (i === 2) {
+              columnLength = x - columnLength;
+            }
             ctx.lineTo(x, y);
           }
         }
@@ -33,6 +41,18 @@ export const DocumentViewer: React.FC<Document> = ({ body, items }) => {
 
         ctx.strokeStyle = 'green';
         ctx.stroke();
+
+        const labelX = polygon[0] * DPI;
+        const labelY = polygon[1] * DPI - (index % 2 == 0 ? 20 : 42);
+        ctx.fillStyle = 'black';
+        const title = columnTitle[origin] || 'Unknown';
+
+        const titleLength = title.match(/[a-zA-Z\d ]/g)?.length ?? 5;
+        ctx.fillRect(labelX, labelY, 10 * (titleLength / 1.6), 20);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '10px Arial';
+        ctx.fillText(title, labelX + 4, labelY + 13);
       });
     },
     [selectedItems],
@@ -57,11 +77,31 @@ export const DocumentViewer: React.FC<Document> = ({ body, items }) => {
 
       if (!clickedBox) return;
 
-      console.log('this clickedBox', clickedBox);
-
       setSelectedItems((prev) => {
         if (!clickedBox.in(prev)) return [...prev, clickedBox];
-        return prev.filter((item) => !item.equals(clickedBox));
+
+        if (clickedBox.in(prev) && clickedBox.origin === 'countryOfOrigin') {
+          return prev.filter((item) => item.itemId !== clickedBox.itemId);
+        }
+
+        const unHighlightedSiblings = items.filter(
+          (box) =>
+            !box.in(prev) &&
+            box.itemId === clickedBox.itemId &&
+            box.origin !== 'countryOfOrigin',
+        );
+
+        // If the row is already highlighted, then remove the highlight
+        // or it is the duplicate countryOfOrigin itemId
+        if (
+          unHighlightedSiblings.length === 0 ||
+          clickedBox.origin === 'countryOfOrigin'
+        ) {
+          return prev.filter((item) => item.itemId !== clickedBox.itemId);
+        }
+
+        // Highlight the siblings too
+        return [...prev, ...unHighlightedSiblings];
       });
     },
     [items],

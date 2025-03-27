@@ -1,3 +1,13 @@
-import { RootState } from "../store";
+import { createSelector } from '@reduxjs/toolkit';
+import { RootState } from '../store';
+import { BoundingBox } from '../../utils/boundingBox';
 
-export const selectDocuments = (state: RootState) => state.documents;         
+const localDocument = (state: RootState) => state.documents.document;
+export const selectDocument = createSelector([localDocument], (document) =>
+  document
+    ? {
+        ...document,
+        items: document.items.map((item) => new BoundingBox(item)),
+      }
+    : null,
+);
