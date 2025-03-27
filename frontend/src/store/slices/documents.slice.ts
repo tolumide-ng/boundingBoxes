@@ -41,7 +41,7 @@ const filesSlice = createSlice({
       fetchDocument.fulfilled,
       (state, action: PayloadAction<Document>) => {
         state.loading = false;
-        state.document = action.payload
+        state.document = action.payload;
       },
     );
     builder.addCase(fetchDocument.rejected, (state, action) => {
