@@ -1,4 +1,5 @@
 import * as React from 'react';
+import styles from './DocumentViewer.module.css';
 import { Document } from '../../models/Document';
 import { MimeType } from '../../utils/mimeType';
 import { BoundingBox } from '../../utils/boundingBox';
@@ -138,9 +139,25 @@ export const DocumentViewer: React.FC<Document> = ({ body, items }) => {
     };
   }, [handleCanvasClick]);
 
+  const buttonText = React.useMemo(() => {
+    return selectedItems.length === items.length
+      ? 'Remove all Bounding Boxes'
+      : 'Display All Bounding Boxes';
+  }, [selectedItems, items]);
+
+  const handleButtonClick = React.useCallback(() => {
+    setSelectedItems((prev) => {
+      if (prev.length === items.length) return [];
+      return [...items];
+    });
+  }, [items]);
+
   return (
-    <article>
-      <div style={{ border: '4px solid green' }}>
+    <article className={styles.canvasWrapper}>
+      <button className="" onClick={handleButtonClick}>
+        {buttonText}
+      </button>
+      <div>
         <canvas ref={canvasRef} />
       </div>
     </article>
